@@ -1,0 +1,8 @@
+{
+  "name": "Persona & Journey Map Generator",
+  "description": "Transform business descriptions into three distinct ideal consumer personas and generate 5-stage Customer Journey Map matrices.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
