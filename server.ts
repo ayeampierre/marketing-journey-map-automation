@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type } from '@google/genai';
@@ -307,10 +308,18 @@ app.get('/api/health', (_req, res) => {
 
 // Setup Vite middleware in dev or static files in production
 async function startServer() {
+  const httpServer = http.createServer(app);
+
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
+    const hmrEnabled = process.env.DISABLE_HMR !== 'true';
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        // Share the app's HTTP server so the HMR WebSocket goes through the same
+        // port as the page; a separate HMR port isn't reachable behind the preview proxy.
+        hmr: hmrEnabled ? { server: httpServer } : false,
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -321,7 +330,7 @@ async function startServer() {
     });
   }
 
-  app.listen(Number(PORT), '0.0.0.0', () => {
+  httpServer.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Server running at http://localhost:${PORT}`);
   });
 }
